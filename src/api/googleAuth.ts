@@ -56,11 +56,15 @@ function gisReady(): Promise<void> {
 /**
  * Get an access token for the Sheets + Drive scopes, prompting the user through
  * the GIS popup when we do not already hold a live one.
+ * Uses VITE_GOOGLE_CLIENT_ID from .env if clientId is not provided.
  */
-export async function getAccessToken(clientId: string, forcePrompt = false): Promise<string> {
-  if (!clientId) {
+export async function getAccessToken(clientId?: string, forcePrompt = false): Promise<string> {
+  const envClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+  const id = clientId || envClientId;
+
+  if (!id) {
     throw new GoogleAuthError(
-      'No Google OAuth Client ID configured. Set VITE_GOOGLE_CLIENT_ID or paste a Client ID in Profile & Settings.',
+      'No Google OAuth Client ID configured. Set VITE_GOOGLE_CLIENT_ID in .env.',
     );
   }
   if (!forcePrompt && cached && cached.expiresAt > Date.now() + 60_000) return cached.token;
@@ -69,7 +73,7 @@ export async function getAccessToken(clientId: string, forcePrompt = false): Pro
 
   return new Promise<string>((resolve, reject) => {
     const client = window.google!.accounts.oauth2.initTokenClient({
-      client_id: clientId,
+      client_id: id,
       scope: GOOGLE_SCOPES,
       callback: (response) => {
         if (response.error || !response.access_token) {

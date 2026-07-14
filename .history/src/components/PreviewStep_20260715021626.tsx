@@ -37,14 +37,14 @@ export default function PreviewStep({
         type="info"
         showIcon
         message="Written from your code changes, not your commit messages"
-        description={`Ejie reads the files each day touched and writes one ${MIN_CHARS}–${MAX_CHARS} character sentence. Rewrite any cell — your edits are what land in the sheet.`}
+        description={`Gemini reads the files each day touched and writes one ${MIN_CHARS}–${MAX_CHARS} character sentence. Rewrite any cell — your edits are what land in the sheet.`}
       />
 
       {!hasApiKey && (
         <Alert
           type="warning"
           showIcon
-          message="No Ejie API key"
+          message="No Gemini API key"
           description="These cells are currently just cleaned-up commit messages. Add a free key in Profile & Settings to have the accomplishments written from the actual file changes."
         />
       )}

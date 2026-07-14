@@ -257,7 +257,7 @@ export default function ProfileStep({ settings, onChange, onReset }: Props) {
             autoComplete="off"
           />
         </Field>
-        {/* <Field  label="Gemini API key (optional if set in .env)">
+        <Field  label="Gemini API key (optional if set in .env)">
           <Input.Password
             value={settings.geminiApiKey}
             onChange={(e) => onChange({ geminiApiKey: e.target.value })}
@@ -272,7 +272,7 @@ export default function ProfileStep({ settings, onChange, onReset }: Props) {
             </Link>
             {' '}— the free tier covers this app comfortably.
           </Text>
-        </Field> */}
+        </Field>
         <Button danger onClick={onReset}>
           Reset all settings
         </Button>

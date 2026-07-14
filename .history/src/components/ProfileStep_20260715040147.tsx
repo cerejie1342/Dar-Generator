@@ -257,14 +257,14 @@ export default function ProfileStep({ settings, onChange, onReset }: Props) {
             autoComplete="off"
           />
         </Field>
-        {/* <Field  label="Gemini API key (optional if set in .env)">
+        <Field label="Gemini API key (optional if set in .env)">
           <Input.Password
             value={settings.geminiApiKey}
             onChange={(e) => onChange({ geminiApiKey: e.target.value })}
             placeholder="AIza…"
             autoComplete="off"
           />
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text hidden type="secondary" style={{ fontSize: 12 }}>
             Used to turn each day's code changes into the accomplishment sentence. Auto-loads from{' '}
             <Text code>VITE_GEMINI_API_KEY</Text> in .env if set. Get a free key at{' '}
             <Link href="https://aistudio.google.com/apikey" target="_blank">
@@ -272,7 +272,7 @@ export default function ProfileStep({ settings, onChange, onReset }: Props) {
             </Link>
             {' '}— the free tier covers this app comfortably.
           </Text>
-        </Field> */}
+        </Field>
         <Button danger onClick={onReset}>
           Reset all settings
         </Button>

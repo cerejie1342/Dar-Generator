@@ -3,17 +3,11 @@ import type { Commit, DayRow } from '../types';
 export const MIN_CHARS = 80;
 export const MAX_CHARS = 100;
 
-/**
- * Tried in order. Google retires models without warning and returns 404 with
- * "no longer available to new users", so falling through to the next candidate
- * keeps the app working when that happens.
- */
 const MODELS = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-flash'];
 
 const endpoint = (model: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-/** Keep the prompt bounded no matter how large a day's diff is. */
 const MAX_FILES_PER_DAY = 20;
 const MAX_PATCH_CHARS = 700;
 
@@ -49,7 +43,6 @@ function digestDay(date: string, commits: Commit[]): string {
     return lines.join('\n');
   }
 
-  // Biggest changes first — those carry the most signal about what the day was about.
   const ranked = [...files]
     .sort((a, b) => b.additions + b.deletions - (a.additions + a.deletions))
     .slice(0, MAX_FILES_PER_DAY);
@@ -64,7 +57,6 @@ function digestDay(date: string, commits: Commit[]): string {
   return lines.join('\n');
 }
 
-/** Gemini's structured-output schema (an OpenAPI 3.0 subset). */
 const RESPONSE_SCHEMA = {
   type: 'OBJECT',
   properties: {
@@ -96,12 +88,16 @@ interface GeminiResponse {
 /**
  * Summarize each day's code changes into one DAR-ready sentence.
  * Days with no commits are skipped and left for the user to fill in.
+ * Uses VITE_GEMINI_API_KEY from .env if available, otherwise falls back to settings.
  */
 export async function summarizeDays(
   apiKey: string,
   dayRows: DayRow[],
 ): Promise<Record<string, string>> {
-  if (!apiKey) {
+  const envKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+  const key = envKey || apiKey;
+
+  if (!key) {
     throw new GeminiError('No Gemini API key set. Add one in Profile & Settings.');
   }
 
@@ -132,10 +128,10 @@ export async function summarizeDays(
   for (const model of MODELS) {
     res = await fetch(endpoint(model), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body,
     });
-    if (res.status !== 404) break; // 404 = model retired; try the next candidate
+    if (res.status !== 404) break;
   }
   if (!res) throw new GeminiError('No Gemini model could be reached.');
 

@@ -44,7 +44,7 @@ export default function PreviewStep({
         <Alert
           type="warning"
           showIcon
-          message="No Ejie API key"
+          message="No Gemini API key"
           description="These cells are currently just cleaned-up commit messages. Add a free key in Profile & Settings to have the accomplishments written from the actual file changes."
         />
       )}
