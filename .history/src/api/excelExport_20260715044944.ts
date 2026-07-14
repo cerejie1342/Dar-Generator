@@ -1,6 +1,5 @@
 
 import dayjs from 'dayjs';
-import ExcelJS from 'exceljs';
 import type { DayRow, Settings } from '../types';
 
 interface DarMeta {

@@ -1,6 +1,5 @@
 
 import dayjs from 'dayjs';
-import ExcelJS from 'exceljs';
 import type { DayRow, Settings } from '../types';
 
 interface DarMeta {
@@ -25,7 +24,6 @@ export async function exportToExcel(
   dayRows: DayRow[],
   meta: DarMeta,
 ): Promise<void> {
-  const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('DAR');
 
   const totalCols = Math.max(12, dayRows.length + 2);
