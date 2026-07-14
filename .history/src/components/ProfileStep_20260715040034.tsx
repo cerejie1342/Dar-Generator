@@ -37,7 +37,7 @@ export default function ProfileStep({ settings, onChange, onReset }: Props) {
           <Col xs={24} md={12}>
             <Field label="Name of PBE">
               <Input
-                value={settings.pbeName}
+                value={settings.pbeName ?? 'CER EJIE C. LISONDATO'}
                 onChange={(e) => onChange({ pbeName: e.target.value })}
                 placeholder="CER EJIE C. LISONDATO"
               />

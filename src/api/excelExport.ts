@@ -35,21 +35,12 @@ export async function exportToExcel(
   const COL_MFO = 2;
   const FIRST_DAY = 3;
   const lastCol = totalCols - 1;
-  const lastDay = lastCol - 1;
 
   // Helper to add/format cells
   const cell = (row: number, col: number, value?: string) => {
     const c = worksheet.getCell(row, col + 1);
     if (value !== undefined) c.value = value;
     return c;
-  };
-
-  const style = (r1: number, c1: number, r2: number, c2: number, fmt: any) => {
-    for (let r = r1; r <= r2; r++) {
-      for (let c = c1; c <= c2; c++) {
-        Object.assign(worksheet.getCell(r, c + 1), fmt);
-      }
-    }
   };
 
   // Organisation header
@@ -69,7 +60,6 @@ export async function exportToExcel(
   ];
 
   const sideBySide = totalCols >= 8;
-  const valueEnd = sideBySide ? Math.min(COL_MFO + 2, lastCol) : lastCol;
 
   infoFields.forEach(([label, value], i) => {
     const row = infoStart + i;
