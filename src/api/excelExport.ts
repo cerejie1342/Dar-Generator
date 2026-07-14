@@ -173,6 +173,11 @@ export async function exportToExcel(
   worksheet.getRow(1).height = 20;
   worksheet.getRow(tableTop).height = 30;
 
+  // Add logo URL at B37
+  const logoCell = worksheet.getCell(37, 2);
+  logoCell.value = 'https://www.davao-water.gov.ph/home/accounts2z/img/logo-hdcwd.png';
+  logoCell.alignment = { wrapText: true };
+
   // Download
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
