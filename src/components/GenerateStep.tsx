@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Alert, Button, Card, Descriptions, Result, Space, Typography, message } from 'antd';
-import { FileExcelOutlined, GoogleOutlined, DownloadOutlined } from '@ant-design/icons';
+import { FileExcelOutlined, GoogleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getAccessToken, signOut } from '../api/googleAuth';
 import { createDarSpreadsheet, periodCovered } from '../api/googleSheets';
-import { exportToExcel } from '../api/excelExport';
 import type { DayRow, Settings } from '../types';
 
 const { Text } = Typography;
@@ -17,7 +16,6 @@ interface Props {
 
 export default function GenerateStep({ settings, dayRows, dateSubmitted }: Props) {
   const [loading, setLoading] = useState(false);
-  const [excelLoading, setExcelLoading] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
 
   const dates = dayRows.map((row) => row.date);
@@ -31,7 +29,7 @@ export default function GenerateStep({ settings, dayRows, dateSubmitted }: Props
     }
     setLoading(true);
     try {
-      const token = await getAccessToken();
+      const token = await getAccessToken(settings.googleClientId);
       const result = await createDarSpreadsheet(token, title, settings, dayRows, {
         periodCovered: period,
         dateSubmitted: dateSubmitted ? dayjs(dateSubmitted).format('MMMM D, YYYY') : '',
@@ -43,26 +41,6 @@ export default function GenerateStep({ settings, dayRows, dateSubmitted }: Props
       message.error((error as Error).message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const generateExcel = async () => {
-    if (dayRows.length === 0) {
-      message.warning('Select at least one attendance date first.');
-      return;
-    }
-    setExcelLoading(true);
-    try {
-      await exportToExcel(`${title}.xlsx`, settings, dayRows, {
-        periodCovered: period,
-        dateSubmitted: dateSubmitted ? dayjs(dateSubmitted).format('MMMM D, YYYY') : '',
-        daysAttended: dayRows.length,
-      });
-      message.success('Excel file downloaded.');
-    } catch (error) {
-      message.error((error as Error).message);
-    } finally {
-      setExcelLoading(false);
     }
   };
 
@@ -104,7 +82,7 @@ export default function GenerateStep({ settings, dayRows, dateSubmitted }: Props
           <Descriptions.Item label="Name of PBE">{settings.pbeName || '—'}</Descriptions.Item>
         </Descriptions>
 
-        <Space style={{ marginTop: 16 }} wrap>
+        <Space style={{ marginTop: 16 }}>
           <Button
             type="primary"
             size="large"
@@ -114,20 +92,13 @@ export default function GenerateStep({ settings, dayRows, dateSubmitted }: Props
           >
             Sign in with Google &amp; generate sheet
           </Button>
-          <Button
-            size="large"
-            icon={<DownloadOutlined />}
-            loading={excelLoading}
-            onClick={generateExcel}
-          >
-            Download as Excel
-          </Button>
           <Button onClick={signOut}>Sign out of Google</Button>
         </Space>
 
-        {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+        {!settings.googleClientId && (
           <Text type="danger" style={{ display: 'block', marginTop: 12 }}>
-            No Google Client ID configured — set VITE_GOOGLE_CLIENT_ID in .env.
+            No Google Client ID configured — set VITE_GOOGLE_CLIENT_ID or paste one in Profile &amp;
+            Settings.
           </Text>
         )}
       </Card>

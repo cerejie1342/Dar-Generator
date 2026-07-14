@@ -257,7 +257,14 @@ export default function ProfileStep({ settings, onChange, onReset }: Props) {
             autoComplete="off"
           />
         </Field>
-        {/* <Field  label="Gemini API key (optional if set in .env)">
+        <Field label="Google OAuth Client ID">
+          <Input
+            value={settings.googleClientId}
+            onChange={(e) => onChange({ googleClientId: e.target.value })}
+            placeholder="…apps.googleusercontent.com (defaults to VITE_GOOGLE_CLIENT_ID)"
+          />
+        </Field>
+        <Field label="Gemini API key">
           <Input.Password
             value={settings.geminiApiKey}
             onChange={(e) => onChange({ geminiApiKey: e.target.value })}
@@ -265,14 +272,14 @@ export default function ProfileStep({ settings, onChange, onReset }: Props) {
             autoComplete="off"
           />
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Used to turn each day's code changes into the accomplishment sentence. Auto-loads from{' '}
-            <Text code>VITE_GEMINI_API_KEY</Text> in .env if set. Get a free key at{' '}
+            Used to turn each day's code changes into the accomplishment sentence. Get one free at{' '}
             <Link href="https://aistudio.google.com/apikey" target="_blank">
               aistudio.google.com/apikey
             </Link>
-            {' '}— the free tier covers this app comfortably.
+            {' '}— the free tier covers this app comfortably. Without it, the app falls back to
+            summarizing commit messages instead of the diffs.
           </Text>
-        </Field> */}
+        </Field>
         <Button danger onClick={onReset}>
           Reset all settings
         </Button>
