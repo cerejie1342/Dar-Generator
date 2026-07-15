@@ -45,6 +45,8 @@ export const DEFAULT_SETTINGS: Settings = {
   githubToken: '',
   googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '',
   geminiApiKey: '',
+
+  defaultSelections: [],
 };
 
 export function loadSettings(): Settings {

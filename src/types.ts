@@ -42,6 +42,9 @@ export interface Settings {
   githubToken: string;
   googleClientId: string;
   geminiApiKey: string;
+
+  /** Repos + branches remembered as the default selection for new sessions. */
+  defaultSelections: RepoSelection[];
 }
 
 export interface Repo {

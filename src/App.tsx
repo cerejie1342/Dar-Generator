@@ -23,7 +23,9 @@ export default function App() {
   const [settings, setSettings] = useState<Settings>(() => loadSettings());
   const [step, setStep] = useState(0);
 
-  const [selections, setSelections] = useState<RepoSelection[]>([]);
+  const [selections, setSelections] = useState<RepoSelection[]>(
+    () => settings.defaultSelections ?? [],
+  );
   const [dates, setDates] = useState<string[]>([]);
   const [dateSubmitted, setDateSubmitted] = useState(dayjs().format('YYYY-MM-DD'));
   const [onlyMine, setOnlyMine] = useState(true);
@@ -153,7 +155,7 @@ export default function App() {
       onOk: () => {
         resetSettings();
         setSettings({ ...DEFAULT_SETTINGS });
-        setSelections([]);
+        setSelections([...DEFAULT_SETTINGS.defaultSelections]);
         setDates([]);
         setCommits([]);
         setDayRows([]);
@@ -182,6 +184,8 @@ export default function App() {
       token={settings.githubToken}
       selections={selections}
       onSelectionsChange={setSelections}
+      defaultSelections={settings.defaultSelections}
+      onDefaultSelectionsChange={(next) => patchSettings({ defaultSelections: next })}
       dates={dates}
       onDatesChange={(next) => {
         setDates(next);

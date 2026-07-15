@@ -27,6 +27,8 @@ interface Props {
   token: string;
   selections: RepoSelection[];
   onSelectionsChange: (next: RepoSelection[]) => void;
+  defaultSelections: RepoSelection[];
+  onDefaultSelectionsChange: (next: RepoSelection[]) => void;
   dates: string[];
   onDatesChange: (next: string[]) => void;
   dateSubmitted: string;
@@ -35,10 +37,23 @@ interface Props {
   onOnlyMineChange: (next: boolean) => void;
 }
 
+/** Order-independent comparison of a repo + branch selection. */
+function sameSelection(a: RepoSelection[], b: RepoSelection[]): boolean {
+  const norm = (list: RepoSelection[]) =>
+    JSON.stringify(
+      [...list]
+        .sort((x, y) => x.fullName.localeCompare(y.fullName))
+        .map((s) => ({ fullName: s.fullName, branches: [...s.branches].sort() })),
+    );
+  return norm(a) === norm(b);
+}
+
 export default function DatesStep({
   token,
   selections,
   onSelectionsChange,
+  defaultSelections,
+  onDefaultSelectionsChange,
   dates,
   onDatesChange,
   dateSubmitted,
@@ -70,6 +85,19 @@ export default function DatesStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  // Pre-loaded (default) selections arrive without their branch lists; fetch
+  // them so the branch dropdowns show every available branch, not just the picks.
+  useEffect(() => {
+    if (!token) return;
+    for (const s of selections) {
+      if (branches[s.fullName]) continue;
+      listBranches(token, s.fullName)
+        .then((list) => setBranches((prev) => ({ ...prev, [s.fullName]: list })))
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, selections]);
+
   const onReposPicked = async (fullNames: string[]) => {
     const next: RepoSelection[] = fullNames.map((fullName) => {
       const existing = selections.find((s) => s.fullName === fullName);
@@ -91,6 +119,18 @@ export default function DatesStep({
   };
 
   const sortedDates = [...dates].sort();
+  const hasDefault = defaultSelections.length > 0;
+  const isDefault = hasDefault && sameSelection(selections, defaultSelections);
+
+  const saveDefault = () => {
+    onDefaultSelectionsChange(selections);
+    message.success('Saved as your default repositories and branches.');
+  };
+
+  const clearDefault = () => {
+    onDefaultSelectionsChange([]);
+    message.success('Default repositories and branches cleared.');
+  };
 
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -98,9 +138,18 @@ export default function DatesStep({
         title="Repositories"
         size="small"
         extra={
-          <Button icon={<ReloadOutlined />} size="small" loading={loading} onClick={loadRepos}>
-            Refresh
-          </Button>
+          <Space>
+            <Button
+              size="small"
+              disabled={selections.length === 0 || isDefault}
+              onClick={saveDefault}
+            >
+              {isDefault ? 'Saved as default' : 'Set as default'}
+            </Button>
+            <Button icon={<ReloadOutlined />} size="small" loading={loading} onClick={loadRepos}>
+              Refresh
+            </Button>
+          </Space>
         }
       >
         <Select
@@ -118,6 +167,19 @@ export default function DatesStep({
             value: r.fullName,
           }))}
         />
+
+        {hasDefault && (
+          <Space size={6} style={{ marginTop: 8 }}>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {isDefault
+                ? 'These are your saved default repositories and branches.'
+                : 'A default selection is saved and loads on next visit.'}
+            </Text>
+            <Button type="link" size="small" style={{ padding: 0 }} onClick={clearDefault}>
+              Clear default
+            </Button>
+          </Space>
+        )}
 
         {selections.length > 0 && (
           <Table
