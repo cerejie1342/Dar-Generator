@@ -1,7 +1,7 @@
 import { Alert, Button, Card, Empty, Input, Space, Spin, Table, Tag, Typography } from 'antd';
 import { ReloadOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { MAX_CHARS, MIN_CHARS } from '../api/gemini';
+import { MAX_CHARS, MIN_CHARS } from '../api/groq';
 import type { DayRow } from '../types';
 
 const { Text, Link } = Typography;
@@ -36,16 +36,16 @@ export default function PreviewStep({
       <Alert
         type="info"
         showIcon
-        message="Written from your code changes, not your commit messages"
-        description={`Gemini reads the files each day touched and writes one ${MIN_CHARS}–${MAX_CHARS} character sentence. Rewrite any cell — your edits are what land in the sheet.`}
+        message="Paraphrased from your commit messages"
+        description={`Groq rewrites each day's commit messages into one ${MIN_CHARS}–${MAX_CHARS} character sentence. Rewrite any cell — your edits are what land in the sheet.`}
       />
 
       {!hasApiKey && (
         <Alert
           type="warning"
           showIcon
-          message="No Gemini API key"
-          description="These cells are currently just cleaned-up commit messages. Add a free key in Profile & Settings to have the accomplishments written from the actual file changes."
+          message="No Groq API key"
+          description="These cells are currently just cleaned-up commit messages. Add a free key in Profile & Settings to have them rewritten into proper accomplishment sentences."
         />
       )}
 
@@ -62,7 +62,7 @@ export default function PreviewStep({
               disabled={!hasApiKey}
               onClick={onSummarize}
             >
-              Rewrite from code changes
+              Rewrite with Groq
             </Button>
             <Button size="small" icon={<ReloadOutlined />} onClick={onRegenerate}>
               Reset to commit messages

@@ -7,7 +7,7 @@ import CommitsStep from './components/CommitsStep';
 import PreviewStep from './components/PreviewStep';
 import GenerateStep from './components/GenerateStep';
 import { fetchCommitFiles, fetchCommits, getUser } from './api/github';
-import { summarizeDays } from './api/gemini';
+import { summarizeDays } from './api/groq';
 import { distribute } from './lib/distribute';
 import { summarize } from './lib/commitText';
 import { DEFAULT_SETTINGS, loadSettings, resetSettings, saveSettings } from './lib/storage';
@@ -54,31 +54,31 @@ export default function App() {
     return rows;
   }, []);
 
-  /** Rewrite each day's cell from the actual file changes, via Claude. */
+  /** Rewrite each day's cell from its commit messages, via Groq. */
   const summarizeChanges = useCallback(
     async (rows: DayRow[]) => {
-      if (!settings.geminiApiKey) {
+      if (!settings.groqApiKey) {
         messageApi.warning(
-          'Add a Gemini API key in Profile & Settings to summarize the code changes. Showing commit messages for now.',
+          'Add a Groq API key in Profile & Settings to rewrite the commits into accomplishments. Showing commit messages for now.',
         );
         return;
       }
       setSummarizing(true);
       try {
-        const summaries = await summarizeDays(settings.geminiApiKey, rows);
+        const summaries = await summarizeDays(settings.groqApiKey, rows);
         setDayRows((prev) =>
           prev.map((row) =>
             summaries[row.date] ? { ...row, accomplishment: summaries[row.date] } : row,
           ),
         );
-        messageApi.success('Accomplishments written from the code changes.');
+        messageApi.success('Accomplishments rewritten from your commit messages.');
       } catch (error) {
         messageApi.error((error as Error).message);
       } finally {
         setSummarizing(false);
       }
     },
-    [settings.geminiApiKey, messageApi],
+    [settings.groqApiKey, messageApi],
   );
 
   const onFetch = async () => {
@@ -209,7 +209,7 @@ export default function App() {
       key="3"
       dayRows={dayRows}
       summarizing={summarizing}
-      hasApiKey={!!settings.geminiApiKey}
+      hasApiKey={!!settings.groqApiKey}
       onChange={setDayRows}
       onSummarize={() => void summarizeChanges(dayRows)}
       onRegenerate={() => buildDayRows(commits, dates)}

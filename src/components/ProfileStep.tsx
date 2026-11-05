@@ -264,20 +264,21 @@ export default function ProfileStep({ settings, onChange, onReset }: Props) {
             placeholder="…apps.googleusercontent.com (defaults to VITE_GOOGLE_CLIENT_ID)"
           />
         </Field>
-        <Field label="Gemini API key">
+        <Field label="Groq API key">
           <Input.Password
-            value={settings.geminiApiKey}
-            onChange={(e) => onChange({ geminiApiKey: e.target.value })}
-            placeholder="AIza…"
+            value={settings.groqApiKey}
+            onChange={(e) => onChange({ groqApiKey: e.target.value })}
+            placeholder="gsk_…"
             autoComplete="off"
           />
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Used to turn each day's code changes into the accomplishment sentence. Get one free at{' '}
-            <Link href="https://aistudio.google.com/apikey" target="_blank">
-              aistudio.google.com/apikey
+            Used to rewrite each day's commit messages into the accomplishment sentence. Get one
+            free at{' '}
+            <Link href="https://console.groq.com/keys" target="_blank">
+              console.groq.com/keys
             </Link>
-            {' '}— the free tier covers this app comfortably. Without it, the app falls back to
-            summarizing commit messages instead of the diffs.
+            {' '}— the free tier covers this app comfortably. Without it, the cells stay as
+            cleaned-up commit messages.
           </Text>
         </Field>
         <Button danger onClick={onReset}>

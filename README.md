@@ -29,11 +29,11 @@ plain static site.
 4. **Preview & Edit** — one row per attendance date, with the raw commits expandable and the final
    accomplishment text editable. What you see here is exactly what lands in the sheet.
 
-   The accomplishment sentence is written from **the code you actually changed**, not from your
-   commit messages. For every commit the app pulls the changed files and their diffs, then sends each
-   day's changes to Gemini, which writes one 80–100 character sentence describing what was
-   accomplished. A live character count flags any cell outside that range. Without a Gemini API key
-   the app falls back to cleaned-up commit messages and says so.
+   The accomplishment sentence is **paraphrased from your commit messages**. The app sends each
+   day's commit messages (plus the names of the files they changed, for context) to Groq, which
+   writes one 80–100 character sentence describing what was accomplished. A live character count
+   flags any cell outside that range. Without a Groq API key the app falls back to cleaned-up commit
+   messages and says so.
 5. **Generate** — signs you in to Google and creates the spreadsheet in your Drive.
 
 ### The redistribution rule
@@ -65,26 +65,31 @@ Create a token at [github.com/settings/tokens](https://github.com/settings/token
 
 Paste it into Profile & Settings. It is stored in `localStorage` and sent only to `api.github.com`.
 
-## Gemini API key
+## Groq API key
 
-Create one **free** at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) and paste it
-into Profile & Settings. It is stored in `localStorage` and sent only to
-`generativelanguage.googleapis.com` (the browser calls the API directly — there is no backend to
-proxy through).
+Create one **free** at [console.groq.com/keys](https://console.groq.com/keys) (sign in, then
+**Create API Key**; it starts with `gsk_`) and paste it into Profile & Settings. It is stored in
+`localStorage` and sent only to `api.groq.com` (the browser calls the API directly — there is no
+backend to proxy through).
 
-Each generated report is a **single request** carrying the diffs for your whole attendance period, so
-one DAR costs one request. Gemini's free tier allows far more than that per day, so in practice this
-costs nothing. The response uses a JSON schema keyed by date, so the day-to-sentence mapping cannot
-drift.
+Each generated report is a **single request** carrying the commit messages for your whole attendance
+period, typically a few thousand tokens, so one DAR costs one request. Replies are matched back to
+their day by date, so the day-to-sentence mapping cannot drift.
 
-Google retires Gemini models fairly often (a retired model returns `404 … no longer available to new
-users`), so [gemini.ts](src/api/gemini.ts) tries a list of models in order — currently
-`gemini-3.5-flash`, then `gemini-3.1-flash-lite`, then `gemini-2.5-flash` — and falls through on a
-404. If they all go, update `MODELS` in that file from
-[ai.google.dev/gemini-api/docs/models](https://ai.google.dev/gemini-api/docs/models).
+[groq.ts](src/api/groq.ts) tries these models in order, falling through when one is out of quota
+(`429`), overloaded (`5xx`, retried twice after 1s then 2s), retired, or not offered to your key:
 
-If you hit a `429`, that's the free-tier per-minute limit — wait a minute and press **Rewrite from
-code changes** again.
+1. `llama-3.1-8b-instant` — the largest free allowance (about 14,400 requests/day) and fast; plain
+   JSON mode.
+2. `openai/gpt-oss-20b` — about 1,000 requests/day; strict JSON schema.
+3. `openai/gpt-oss-120b` — about 1,000 requests/day; strict JSON schema.
+
+Groq rate-limits per model, so each fallback has its own quota. Your organization's exact limits are
+at [console.groq.com/settings/limits](https://console.groq.com/settings/limits). If Groq retires a
+model, update `MODELS` in [groq.ts](src/api/groq.ts) from
+[console.groq.com/docs/models](https://console.groq.com/docs/models).
+
+If every model is rate-limited or overloaded, wait a minute and press **Rewrite with Groq** again.
 
 **Note on browser-side keys:** anyone with access to this browser profile can read the key out of
 `localStorage`, exactly as with the GitHub PAT. That is the unavoidable cost of a no-backend app. In

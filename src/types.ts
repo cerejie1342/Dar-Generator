@@ -41,7 +41,7 @@ export interface Settings {
   // Credentials
   githubToken: string;
   googleClientId: string;
-  geminiApiKey: string;
+  groqApiKey: string;
 
   /** Repos + branches remembered as the default selection for new sessions. */
   defaultSelections: RepoSelection[];
@@ -78,7 +78,7 @@ export interface Commit {
   date: string;
   url: string;
   authorLogin?: string;
-  /** Populated by fetchCommitFiles(); this is what the summary is written from. */
+  /** Populated by fetchCommitFiles(); the file names give the summary context for terse messages. */
   files?: CommitFile[];
 }
 

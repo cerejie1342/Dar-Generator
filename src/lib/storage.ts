@@ -44,7 +44,7 @@ export const DEFAULT_SETTINGS: Settings = {
 
   githubToken: '',
   googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '',
-  geminiApiKey: '',
+  groqApiKey: '',
 
   defaultSelections: [],
 };
@@ -53,7 +53,10 @@ export function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return { ...DEFAULT_SETTINGS };
-    const parsed = JSON.parse(raw) as Partial<Settings>;
+    // Drop the key from the old Gemini integration so it isn't re-saved indefinitely.
+    const { geminiApiKey: _legacyGeminiKey, ...parsed } = JSON.parse(raw) as Partial<Settings> & {
+      geminiApiKey?: string;
+    };
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
