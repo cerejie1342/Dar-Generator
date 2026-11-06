@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Card, Layout, Modal, Space, Steps, Typography, message } from 'antd';
 import dayjs from 'dayjs';
-import ProfileStep from './components/ProfileStep';
-import DatesStep from './components/DatesStep';
-import CommitsStep from './components/CommitsStep';
-import PreviewStep from './components/PreviewStep';
-import GenerateStep from './components/GenerateStep';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchCommitFiles, fetchCommits, getUser } from './api/github';
 import { summarizeDays } from './api/groq';
-import { distribute } from './lib/distribute';
+import CommitsStep from './components/CommitsStep';
+import DatesStep from './components/DatesStep';
+import GenerateStep from './components/GenerateStep';
+import PreviewStep from './components/PreviewStep';
+import ProfileStep from './components/ProfileStep';
 import { summarize } from './lib/commitText';
+import { distribute } from './lib/distribute';
 import { DEFAULT_SETTINGS, loadSettings, resetSettings, saveSettings } from './lib/storage';
 import type { Commit, DayRow, RepoSelection, Settings } from './types';
 
@@ -244,13 +244,15 @@ export default function App() {
           <Button disabled={step === 0} onClick={() => setStep((s) => s - 1)}>
             Back
           </Button>
-          <Button
-            type="primary"
-            disabled={step === STEPS.length - 1 || !canAdvance}
-            onClick={() => setStep((s) => s + 1)}
-          >
-            Next
-          </Button>
+          {step < STEPS.length - 1 && (
+            <Button
+              type="primary"
+              disabled={!canAdvance}
+              onClick={() => setStep((s) => s + 1)}
+            >
+              Next
+            </Button>
+          )}
         </Space>
       </Content>
 
